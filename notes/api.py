@@ -37,3 +37,18 @@ def get_note(request, note_id: int):
     return 500, {"message": str(e)}
   except Note.DoesNotExist:
     return 404, {"message": "Note not found"}
+
+@api.get("/note", response={200: List[NoteBody], 500: Error, 404: Error})
+def get_notes(request):
+  try:
+    notes = Note.objects.all()
+    return [NoteBody(
+      name=note.name,
+      description=note.description,
+      prompt=note.prompt,
+      file_path=note.file_path
+    ) for note in notes]
+  except Exception as e:
+    return 500, {"message": str(e)}
+  except Note.DoesNotExist:
+    return 404, {"message": "Note not found"}
