@@ -1,7 +1,7 @@
 from ninja import NinjaAPI
 from .models import Note
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 api = NinjaAPI()
 
@@ -19,8 +19,21 @@ class Error(BaseModel):
 def create_note(request, note: NoteBody):
   try:
     Note.objects.create(**note.model_dump())
-    return 200, note
+    return note
   except Exception as e:
     return 500, {"message": str(e)}
 
-
+@api.get("/note/{note_id}", response={200: NoteBody, 500: Error, 404: Error})
+def get_note(request, note_id: int):
+  try:
+    note = Note.objects.get(id=note_id)
+    return NoteBody(
+      name=note.name,
+      description=note.description,
+      prompt=note.prompt,
+      file_path=note.file_path
+    )
+  except Exception as e:
+    return 500, {"message": str(e)}
+  except Note.DoesNotExist:
+    return 404, {"message": "Note not found"}
