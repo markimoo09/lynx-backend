@@ -90,8 +90,8 @@ def analyze_note(request, body: AnalyzeNoteBody):
       if in_markdown_section and line_stripped.startswith("#") and line_stripped.count("#") <= markdown_section_level:
         break
 
-      if in_markdown_section:
-        section_content += line
+      if in_markdown_section and line_stripped != "" and not "![[" in line_stripped:
+        section_content += line + " "
 
       if line_stripped.startswith("#"):
         if line_stripped == markdown_section:
