@@ -79,7 +79,7 @@ def analyze_note(request, body: AnalyzeNoteBody):
   markdown_section = body.markdown
 
   in_markdown_section = False
-  section_content = ""
+  section_content = []
   section_name = ""
 
   # Open and extract data from the file
@@ -91,7 +91,7 @@ def analyze_note(request, body: AnalyzeNoteBody):
         break
 
       if in_markdown_section and line_stripped != "" and not "![[" in line_stripped:
-        section_content += line + " "
+        section_content.append(line)
 
       if line_stripped.startswith("#"):
         if line_stripped == markdown_section:
@@ -101,7 +101,7 @@ def analyze_note(request, body: AnalyzeNoteBody):
 
   return AnalyzeNoteResponse(
     section_name=section_name,
-    section_content=section_content
+    section_content="\n".join(section_content)
   )
 
 
