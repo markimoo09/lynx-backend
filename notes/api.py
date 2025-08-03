@@ -3,7 +3,8 @@ from ninja import NinjaAPI
 from .models import Note
 from pydantic import BaseModel
 from typing import Optional, List
-import markdown
+from asgiref.sync import sync_to_async
+from analyzer.analyzer import analyze_note as ai_summarizer
 
 api = NinjaAPI()
 
@@ -64,11 +65,11 @@ def get_notes(request):
     return 404, {"message": "Note not found"}
 
 @api.post("/analyze_note", response={200: AnalyzeNoteResponse, 500: Error})
-def analyze_note(request, body: AnalyzeNoteBody):
+async def analyze_note(request, body: AnalyzeNoteBody):
 
   # Get the note name and its prompt
   try:
-    note = Note.objects.get(id=body.note_id)
+    note = await sync_to_async(Note.objects.get)(id=body.note_id)
   except Exception as e:
     return 500, {"message": str(e)}
 
@@ -99,9 +100,16 @@ def analyze_note(request, body: AnalyzeNoteBody):
           section_name = line_stripped.replace("#", "").strip()
           continue
 
+  if len(section_content) == 0:
+    return 500, {"message": "No content found"}
+
+  response = await ai_summarizer(section_content)
+  if response is None:
+    return 500, {"message": "Failed to analyze note"}
+
   return AnalyzeNoteResponse(
     section_name=section_name,
-    section_content="\n".join(section_content)
+    section_content=response
   )
 
 

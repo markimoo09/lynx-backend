@@ -1,5 +1,8 @@
 from pydantic import BaseModel
-from pydantic_ai import Agent, ModelSettings
+from pydantic_ai import Agent
+from pydantic_ai.models.google import GoogleModel
+from pydantic_ai.providers.google import GoogleProvider
+from pydantic_ai.settings import ModelSettings
 from typing import List
 from dotenv import load_dotenv
 import os
@@ -11,7 +14,7 @@ SYSTEM_PROMPT = """
 You will be summarizing, refining, and/or organizing notes given to you.
 Format your output in markdown format, this is an example you can follow:
 
-# July 25 2025 - API Authentication
+# API Authentication
 
 ## Summary
 - Created a new API authentication system
@@ -24,21 +27,25 @@ Format your output in markdown format, this is an example you can follow:
 - Detail 3
 """
 
-agent = Agent(
-  'google-gla:gemini-2.5-flash-lite',
-  settings=ModelSettings(
-    temperature=0.3
-  ),
-  system_prompt=SYSTEM_PROMPT,
+provider = GoogleProvider(
   api_key=GEMINI_API_KEY
+)
+
+model = GoogleModel('gemini-2.5-flash-lite', provider=provider)
+
+agent = Agent(
+    model=model,
+    model_settings=ModelSettings(temperature=0.3),
+    system_prompt=SYSTEM_PROMPT,
 )
 
 async def analyze_note(note_content: List[str]) -> str:
   content = "\n".join(note_content)
 
   try:
-    response = await agent.generate_content(content)
-    return response.content
+    response = await agent.run(content)
+    print(response)
+    return response.output
   except Exception as e:
     print(e)
     return None
