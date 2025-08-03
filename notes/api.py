@@ -87,17 +87,17 @@ def analyze_note(request, body: AnalyzeNoteBody):
     for line in file:
       line_stripped = line.strip()
 
+      if in_markdown_section and line_stripped.startswith("#") and line_stripped.count("#") <= markdown_section_level:
+        break
+
+      if in_markdown_section:
+        section_content += line
+
       if line_stripped.startswith("#"):
         if line_stripped == markdown_section:
           in_markdown_section = True
           section_name = line_stripped.replace("#", "").strip()
           continue
-
-      if in_markdown_section:
-        section_content += line
-
-      if line_stripped.startswith("#") and line_stripped.count("#") < markdown_section_level:
-        break
 
   return AnalyzeNoteResponse(
     section_name=section_name,
