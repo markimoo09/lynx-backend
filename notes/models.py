@@ -4,7 +4,7 @@ from django.db import models
 
 class Note(models.Model):
   name = models.CharField(max_length=255)
-  description = models.TextField()
+  description = models.TextField(null=True, blank=True)
   prompt = models.TextField()
   file_path = models.CharField(max_length=255)
   created_at = models.DateTimeField(auto_now_add=True)
