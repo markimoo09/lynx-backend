@@ -1,4 +1,3 @@
-from cmd import PROMPT
 from ninja import NinjaAPI
 from .models import Note
 from pydantic import BaseModel
