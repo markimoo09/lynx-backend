@@ -1,2 +1,7 @@
-.python-version
 venv/
+__pycache__/
+.env
+*.pyc
+node_modules/
+.next/
+.python-version
