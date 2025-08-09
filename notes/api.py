@@ -18,12 +18,10 @@ class AnalyzeNoteBody(BaseModel):
   markdown: str
 
 class AnalyzeNoteResponse(BaseModel):
-  section_name: str
   section_content: str
 
 class WriteToNoteBody(BaseModel):
   note_id: int
-  section_name: str
   section_content: str
 
 class Error(BaseModel):
@@ -41,10 +39,9 @@ def create_note(request, note: NoteBody):
 @api.post("/note/write", response={200: Error, 500: Error})
 async def write_to_note(request, body: WriteToNoteBody):
   note_id = body.note_id
-  section_name = body.section_name
   section_content = body.section_content
 
-  if not body.note_id or not body.section_name or not body.section_content:
+  if not body.note_id or not body.section_content:
     return 500, {"message": "Invalid request"}
 
   try:
@@ -53,7 +50,6 @@ async def write_to_note(request, body: WriteToNoteBody):
 
     with open(note_location, "a", encoding="utf-8") as file:
       file.write("\n\n")
-      file.write(section_name + "\n")
       file.write(section_content + "\n")
 
     return 200, {"message": "Note updated"}
@@ -108,7 +104,6 @@ async def analyze_note(request, body: AnalyzeNoteBody):
 
   in_markdown_section = False
   section_content = []
-  section_name = ""
 
   # Open and extract data from the file
   with open(noteFilePath, "r") as file:
@@ -124,7 +119,6 @@ async def analyze_note(request, body: AnalyzeNoteBody):
       if line_stripped.startswith("#"):
         if line_stripped == markdown_section:
           in_markdown_section = True
-          section_name = line_stripped.replace("#", "").strip()
           continue
 
   if len(section_content) == 0:
@@ -135,7 +129,6 @@ async def analyze_note(request, body: AnalyzeNoteBody):
     return 500, {"message": "Failed to analyze note"}
 
   return AnalyzeNoteResponse(
-    section_name=section_name,
     section_content=response
   )
 
