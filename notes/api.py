@@ -72,6 +72,22 @@ def get_note(request, note_id: int):
   except Note.DoesNotExist:
     return 404, {"message": "Note not found"}
 
+@api.put("/note/{note_id}", response={200: NoteBody, 500: Error, 404: Error})
+def update_note(request, note_id: int, body: NoteBody):
+  try:
+    note = Note.objects.get(id=note_id)
+    note.name = body.name
+    note.description = body.description
+    note.prompt = body.prompt
+    note.file_path = body.file_path
+
+    note.save()
+    return 200, body
+  except Exception as e:
+    return 500, {"message": str(e)}
+  except Note.DoesNotExist:
+    return 404, {"message": "Note not found"}
+
 @api.get("/note", response={200: List[NoteBody], 500: Error, 404: Error})
 def get_notes(request):
   try:
