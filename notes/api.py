@@ -21,6 +21,11 @@ class AnalyzeNoteResponse(BaseModel):
   section_name: str
   section_content: str
 
+class WriteToNoteBody(BaseModel):
+  note_id: int
+  section_name: str
+  section_content: str
+
 class Error(BaseModel):
   message: str
 
@@ -31,6 +36,31 @@ def create_note(request, note: NoteBody):
     Note.objects.create(**note.model_dump())
     return note
   except Exception as e:
+    return 500, {"message": str(e)}
+
+@api.post("/note/write", response={200: Error, 500: Error})
+async def write_to_note(request, body: WriteToNoteBody):
+  note_id = body.note_id
+  section_name = body.section_name
+  section_content = body.section_content
+
+  if not body.note_id or not body.section_name or not body.section_content:
+    return 500, {"message": "Invalid request"}
+
+  try:
+    note = await sync_to_async(Note.objects.get)(id=note_id)
+    note_location = note.file_path
+
+    with open(note_location, "w", encoding="utf-8") as file:
+      file.seek(0, 2)
+      file.write("\n\n")
+
+      file.write(section_name + "\n")
+      file.write(section_content)
+
+    return 200, {"message": "Note updated"}
+  except Exception as e:
+    print("Failed with this error: ", e)
     return 500, {"message": str(e)}
 
 @api.get("/note/{note_id}", response={200: NoteBody, 500: Error, 404: Error})
@@ -110,6 +140,7 @@ async def analyze_note(request, body: AnalyzeNoteBody):
     section_name=section_name,
     section_content=response
   )
+
 
 
 
