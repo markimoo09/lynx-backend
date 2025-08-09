@@ -51,12 +51,10 @@ async def write_to_note(request, body: WriteToNoteBody):
     note = await sync_to_async(Note.objects.get)(id=note_id)
     note_location = note.file_path
 
-    with open(note_location, "w", encoding="utf-8") as file:
-      file.seek(0, 2)
+    with open(note_location, "a", encoding="utf-8") as file:
       file.write("\n\n")
-
       file.write(section_name + "\n")
-      file.write(section_content)
+      file.write(section_content + "\n")
 
     return 200, {"message": "Note updated"}
   except Exception as e:
