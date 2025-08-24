@@ -1,5 +1,7 @@
 # lynx
 
+# THIS PROJECT IS NOW DISCONTINUED AND HAS PIVOTED TO DEVELOPING AN OBSIDIAN PLUGIN INSTEAD
+
 Lynx is an AI powered note summarizer which also refines and organizes notes into a more useful structure.
 
 ## Summary
